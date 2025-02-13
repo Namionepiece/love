@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>你有一条新消息</title>
+  <style>
+    /* 星空背景 */
+    body {
+      background-color: #000;
+      background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); /* 星空背景 */
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+
+    /* 弹窗样式 */
+    .popup {
+      position: absolute;
+      top: 30vh;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 24px;
+      text-align: center;
+      width: 50%;
+      left: 25%;
+      display: none;
+      z-index: 15;
+    }
+
+    .popup button {
+      margin: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #ff66b2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* 麦当劳标志 */
+    .mcdonalds-logo {
+      position: absolute;
+      top: 15vh;
+      font-size: 150px;
+      color: yellow;
+      font-weight: bold;
+      text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 10;
+    }
+
+    /* 文字样式 */
+    .text {
+      position: absolute;
+      font-size: 50px;
+      color: #f5f5dc; /* 米白色 */
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: bold;
+      text-align: center;
+      opacity: 0;
+      top: 50vh;
+      z-index: 20;
+    }
+
+    /* 流星样式 */
+    .meteor {
+      position: absolute;
+      width: 5px;
+      height: 20px;
+      background: rgba(173, 216, 230, 1);
+      opacity: 0.8;
+      transform: rotate(45deg);
+      z-index: 30;
+      display: none;
+    }
+
+    /* 爱心 */
+    .heart {
+      position: absolute;
+      font-size: 30px;
+      color: red;
+      opacity: 0;
+      animation: heartBloom 2s forwards;
+      z-index: 5;
+    }
+
+    @keyframes heartBloom {
+      0% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1.5);
+      }
+    }
+
+    /* 彩带效果 */
+    .confetti {
+      position: absolute;
+      top: 10%;
+      width: 5px;
+      height: 10px;
+      background-color: #ffcc00;
+      opacity: 0;
+      animation: confettiAnimation 3s infinite;
+      z-index: 40;
+    }
+
+    @keyframes confettiAnimation {
+      0% {
+        opacity: 1;
+        transform: translateX(0) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(100vh) rotate(180deg);
+      }
+    }
+
+    /* 流星动画关键帧 */
+    @keyframes meteorFall {
+      0% {
+        transform: translateY(0) translateX(0) rotate(45deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) translateX(-100vw) rotate(45deg);
+        opacity: 0;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <!-- 背景音乐 -->
+  <audio id="bgMusic" loop>
+    <source src="background-music.mp3" type="audio/mp3"> <!-- 替换为你喜欢的背景音乐 -->
+  </audio>
+
+  <!-- 弹窗1 -->
+  <div id="popup1" class="popup">
+    <div>你还记得我们第一次见面的地方吗？</div>
+    <button onclick="nextStep(1)">记得</button>
+    <button onclick="nextStep(1)">不会忘记</button>
+  </div>
+
+  <!-- 麦当劳标志 -->
+  <div id="mcdonaldsLogo" class="mcdonalds-logo">M</div>
+
+  <!-- 弹窗2 -->
+  <div id="popup2" class="popup">
+    <div>今天是什么日子？</div>
+    <button onclick="nextStep(2)">叽咕叽咕的情人节</button>
+    <button onclick="nextStep(2)">喵喵咪咪的情人节</button>
+  </div>
+
+  <!-- 文字 -->
+  <div id="text" class="text">西西&光光<br>第一个情人节</div>
+
+  <!-- 弹窗3 -->
+  <div id="popup3" class="popup">
+    <div>不管那天是不是飞机，现在我们有流星啦！</div>
+    <button onclick="nextStep(3)">好耶</button>
+  </div>
+
+  <!-- 流星容器 -->
+  <div id="meteor-container"></div>
+
+  <!-- 爱心容器 -->
+  <div id="hearts"></div>
+
+  <script>
+    let step = 0;
+
+    // 背景音乐自动播放
+    window.onload = function() {
+      const bgMusic = document.getElementById('bgMusic');
+      bgMusic.play(); // 自动播放背景音乐
+    };
+
+    // 点击页面显示第一个弹窗
+    window.onclick = function() {
+      if (step === 0) {
+        document.getElementById('popup1').style.display = "block";
+        step = 1;
+      }
+    };
+
+    // 触发每个步骤
+    function nextStep(currentStep) {
+      if (currentStep === 1) {
+        document.getElementById('popup1').style.display = "none";
+        document.getElementById('mcdonaldsLogo').style.display = "block";
+        createConfetti(); // 撒彩带
+        playSoundEffect('sound/cascade.mp3'); // 播放彩带音效
+        setTimeout(() => document.getElementById('popup2').style.display = "block", 2000);
+      } else if (currentStep === 2) {
+        document.getElementById('popup2').style.display = "none";
+        document.getElementById('text').style.opacity = "1";
+        createConfetti(); // 撒彩带
+        playSoundEffect('sound/cascade.mp3'); // 播放彩带音效
+        setTimeout(() => document.getElementById('popup3').style.display = "block", 2000);
+      } else if (currentStep === 3) {
+        document.getElementById('popup3').style.display = "none";
+        startMeteorShower(); // 开始流星雨
+        setTimeout(createHearts, 5000); // 5秒后生成爱心
+        playSoundEffect('sound/meteor.mp3'); // 播放流星音效
+      }
+    }
+
+    // 播放音效
+    function playSoundEffect(src) {
+      let audio = new Audio(src); // 创建音频对象
+      audio.play(); // 播放音效
+    }
+
+    // 生成彩带
+    function createConfetti() {
+      for (let i = 0; i < 50; i++) {
+        let confetti = document.createElement('div');
+        confetti.classList.add('confetti');
+        confetti.style.left = `${Math.random() * 100}vw`;
+        confetti.style.animationDelay = `${Math.random() * 5}s`;
+        document.body.appendChild(confetti);
+      }
+    }
+
+    // 流星动画：每颗流星的移动效果
+    function startMeteorShower() {
+      const meteorContainer = document.getElementById('meteor-container');
+      for (let i = 0; i < 30; i++) {
+        let meteor = document.createElement('div');
+        meteor.classList.add('meteor');
+        meteor.style.left = Math.random() * window.innerWidth + "px";
+        meteor.style.top = Math.random() * window.innerHeight / 2 + "px";
+        meteor.style.display = "block";  // Ensure visibility
+        meteor.style.animation = `meteorFall ${Math.random() * 3 + 2}s linear forwards`;
+        meteorContainer.appendChild(meteor);
+      }
+    }
+
+    // 动态生成爱心
+    function createHearts() {
+      const heartContainer = document.getElementById('hearts');
+      for (let i = 0; i < 100; i++) {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        heart.innerHTML = '❤️';
+        heart.style.left = `${Math.random() * 100}vw`;
+        heart.style.top = `${Math.random() * 100}vh`;
+        heartContainer.appendChild(heart);
+      }
+    }
+  </script>
+</body>
+</html>
